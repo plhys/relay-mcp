@@ -1,9 +1,12 @@
 [project]
 name = "relay-mcp"
 version = "0.1.0"
-description = "端云协同中继 MCP Server"
+description = "relay MCP server"
 requires-python = ">=3.10"
 dependencies = ["mcp>=1.0.0"]
+
+[project.scripts]
+relay-mcp = "server:main"
 
 [build-system]
 requires = ["setuptools"]
