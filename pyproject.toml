@@ -3,7 +3,6 @@ name = "relay-mcp"
 version = "0.1.0"
 description = "relay MCP server"
 requires-python = ">=3.10"
-dependencies = ["mcp"]
 
 [project.scripts]
 relay-mcp = "server:main"
