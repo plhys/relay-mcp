@@ -30,28 +30,10 @@ class H(http.server.BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*'); self.end_headers()
     def log_message(self, *a): pass
 
-def add_task(command):
-    tid = str(uuid.uuid4())[:8]
-    tasks[tid] = {"id": tid, "command": command}
-    waiters.put(tid)
-    return f"Task sent: {tid}"
-
-def check_result(task_id):
-    r = results.get(task_id, None)
-    return r["output"] if r else "Waiting..."
-
-with gr.Blocks(title="Relay Server") as demo:
-    gr.Markdown("# Relay Server")
-    with gr.Tab("Send Task"):
-        cmd = gr.Textbox(label="Command")
-        btn = gr.Button("Send")
-        out = gr.Textbox(label="Result")
-        btn.click(add_task, inputs=[cmd], outputs=[out])
-    with gr.Tab("Check Result"):
-        tid = gr.Textbox(label="Task ID")
-        btn2 = gr.Button("Check")
-        out2 = gr.Textbox(label="Result")
-        btn2.click(check_result, inputs=[tid], outputs=[out2])
-
 threading.Thread(target=lambda: http.server.HTTPServer(('0.0.0.0', 8765), H).serve_forever(), daemon=True).start()
+
+with gr.Blocks(title="Relay") as demo:
+    gr.Markdown("## Relay Server Running")
+    gr.Markdown("API: /add /pull /push /result/<id>")
+
 demo.launch(server_name="0.0.0.0", server_port=7860)
