@@ -1,5 +1,5 @@
 import gradio as gr
-import http.server, json, uuid, queue, threading
+import http.server, json, uuid, queue, threading, time
 
 tasks = {}
 results = {}
@@ -30,10 +30,9 @@ class H(http.server.BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*'); self.end_headers()
     def log_message(self, *a): pass
 
-threading.Thread(target=lambda: http.server.HTTPServer(('0.0.0.0', 8765), H).serve_forever(), daemon=True).start()
+t = threading.Thread(target=http.server.HTTPServer(('0.0.0.0', 8765), H).serve_forever)
+t.daemon = True
+t.start()
 
-with gr.Blocks(title="Relay") as demo:
-    gr.Markdown("## Relay Server Running")
-    gr.Markdown("API: /add /pull /push /result/<id>")
-
-demo.launch(server_name="0.0.0.0", server_port=7860)
+demo = gr.Interface(fn=lambda x: "Relay Server Running", inputs="text", outputs="text", title="Relay")
+demo.launch(server_name="0.0.0.0")
