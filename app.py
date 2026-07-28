@@ -1,11 +1,10 @@
 import gradio as gr
-import http.server, json, uuid, queue, threading, os
+import http.server, json, uuid, queue, threading
 
 tasks = {}
 results = {}
 waiters = queue.Queue()
 
-# === HTTP 中继服务 ===
 class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/pull':
@@ -31,30 +30,28 @@ class H(http.server.BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*'); self.end_headers()
     def log_message(self, *a): pass
 
-# === Gradio 界面 ===
 def add_task(command):
     tid = str(uuid.uuid4())[:8]
     tasks[tid] = {"id": tid, "command": command}
     waiters.put(tid)
-    return f"任务已发送: {tid}"
+    return f"Task sent: {tid}"
 
 def check_result(task_id):
     r = results.get(task_id, None)
-    return r["output"] if r else "等待中..."
+    return r["output"] if r else "Waiting..."
 
 with gr.Blocks(title="Relay Server") as demo:
-    gr.Markdown("# 端云协同中继服务")
-    with gr.Tab("发任务"):
-        cmd = gr.Textbox(label="命令")
-        btn = gr.Button("发送")
-        out = gr.Textbox(label="结果")
+    gr.Markdown("# Relay Server")
+    with gr.Tab("Send Task"):
+        cmd = gr.Textbox(label="Command")
+        btn = gr.Button("Send")
+        out = gr.Textbox(label="Result")
         btn.click(add_task, inputs=[cmd], outputs=[out])
-    with gr.Tab("查结果"):
-        tid = gr.Textbox(label="任务ID")
-        btn2 = gr.Button("查询")
-        out2 = gr.Textbox(label="结果")
+    with gr.Tab("Check Result"):
+        tid = gr.Textbox(label="Task ID")
+        btn2 = gr.Button("Check")
+        out2 = gr.Textbox(label="Result")
         btn2.click(check_result, inputs=[tid], outputs=[out2])
 
-# 启动 HTTP 服务在后台
 threading.Thread(target=lambda: http.server.HTTPServer(('0.0.0.0', 8765), H).serve_forever(), daemon=True).start()
 demo.launch(server_name="0.0.0.0", server_port=7860)
